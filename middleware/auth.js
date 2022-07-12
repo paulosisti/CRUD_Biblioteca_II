@@ -12,14 +12,23 @@ exports.getToken = (req, res, next) => {
 }
 
 exports.verifyJWT = (req, res, next) => {
-  const token = req.headers['x-access-token']
-  jwt.verify(token, SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(401).send({ mensagem: 'Falha na autenticação' });
+  const token = req.headers['x-access-token'];
+  if (!token) {
+    const error = {
+      status: 403,
+      msg: "Não foi informado token de acesso"
     }
-    else {
-      req.userId = decoded.userId;
-      next();
-    }
-  })
+    res.status(error.status).json(error);
+  }
+  else {
+    jwt.verify(token, SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(401).send({ mensagem: 'Falha na autenticação' });
+      }
+      else {
+        req.userId = decoded.userId;
+        next();
+      }
+    })
+  }
 }
